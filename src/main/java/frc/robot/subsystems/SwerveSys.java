@@ -65,12 +65,19 @@ public class SwerveSys extends SubsystemBase {
         return isFieldOriented;
     }
 
-    private double speedFactor = 0.25; //Speed
+    private double speedFactor = 0.3; //Speed
     public double getSpeedFactor() {
         return speedFactor;
     }
     public void setSpeedFactor(double speedFactor) {
         this.speedFactor = speedFactor;
+    }
+    public void increaseSpeedFactor(double difference) {
+        this.speedFactor += difference;
+    }
+    public void decreaseSpeedFactor(double difference) {
+        System.out.println("Hello there3");
+        this.speedFactor -= difference;
     }
 
     private boolean isTracking = false;
@@ -104,6 +111,8 @@ public class SwerveSys extends SubsystemBase {
         resetDriveDistances();
 
         resetPose();
+        SmartDashboard.putNumber("Speed Percent", speedFactor);
+
     }
  
     // This method will be called once per scheduler run
@@ -116,6 +125,8 @@ public class SwerveSys extends SubsystemBase {
         SmartDashboard.putNumber("front right CANcoder", frontRightMod.getCanCoderAngle().getDegrees());
         SmartDashboard.putNumber("rear left CANcoder", rearLeftMod.getCanCoderAngle().getDegrees());
         SmartDashboard.putNumber("rear right CANcoder", rearRightMod.getCanCoderAngle().getDegrees());
+
+        speedFactor = SmartDashboard.getNumber("Speed Percent", speedFactor);
     }
     
     /**
@@ -142,7 +153,7 @@ public class SwerveSys extends SubsystemBase {
             // Reduces the speed of the drive base for "turtle" or "sprint" modes.
             driveX *= speedFactor;
             driveY *= speedFactor;
-            rotation *= speedFactor;
+            rotation *= speedFactor; //TODO: make individually modifiable
 
             // Represents the overall state of the drive base.
             ChassisSpeeds speeds =

@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ControllerConstants;
+import frc.robot.commands.drivetrain.IncreaseSpdCmd;
+import frc.robot.commands.drivetrain.DecreaseSpdCmd;
 import frc.robot.commands.drivetrain.LockCmd;
 import frc.robot.commands.drivetrain.ResetHeadingCmd;
 import frc.robot.commands.drivetrain.SwerveDriveCmd;
@@ -25,6 +27,11 @@ public class RobotContainer {
     private final Trigger driverLeftTriggerBtn =
         new Trigger(() -> driverController.getLeftTriggerAxis() > ControllerConstants.triggerPressedThreshhold);
 
+    private final Trigger driverSpeedUpButton = 
+        new Trigger(() -> driverController.getXButtonPressed());
+
+    private final Trigger driverSlowDownButton = 
+        new Trigger(() -> driverController.getAButtonPressed());
 
     // Initialize auto selector.
     SendableChooser<Command> autoSelector = new SendableChooser<Command>();
@@ -48,6 +55,15 @@ public class RobotContainer {
         driverMenuBtn.onTrue(new ResetHeadingCmd(swerveSys));
 
         driverLeftTriggerBtn.whileTrue(new LockCmd(swerveSys));
+
+        driverSpeedUpButton.onTrue(new IncreaseSpdCmd(
+            0.1,
+            swerveSys)
+        );
+        driverSlowDownButton.onTrue(new DecreaseSpdCmd(
+            0.1, 
+            swerveSys)
+        );
     }
 
     public Command getAutonomousCommand() {
@@ -73,6 +89,6 @@ public class RobotContainer {
 
     public void updateInterface() {
         SmartDashboard.putNumber("heading degrees", swerveSys.getHeading().getDegrees());
-        SmartDashboard.putNumber("speed m/s", swerveSys.getAverageDriveVelocityMetersPerSecond());
+        SmartDashboard.putNumber("speed m//s", swerveSys.getAverageDriveVelocityMetersPerSecond());
     }
 }
