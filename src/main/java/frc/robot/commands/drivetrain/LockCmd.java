@@ -1,9 +1,9 @@
 package frc.robot.commands.drivetrain;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSys;
 
-public class LockCmd extends CommandBase {
+public class LockCmd extends Command {
 
     private final SwerveSys swerveSys;
 

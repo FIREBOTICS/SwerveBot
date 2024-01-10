@@ -1,10 +1,10 @@
 package frc.robot.commands.drivetrain;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSys;
 
-public class IncreaseSpdCmd extends CommandBase {
+public class IncreaseSpdCmd extends Command {
 
     private final SwerveSys swerveSys;
 

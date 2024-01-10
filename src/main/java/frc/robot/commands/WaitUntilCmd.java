@@ -2,9 +2,9 @@ package frc.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
-public class WaitUntilCmd extends CommandBase {
+public class WaitUntilCmd extends Command {
 
     private final BooleanSupplier condition;
 

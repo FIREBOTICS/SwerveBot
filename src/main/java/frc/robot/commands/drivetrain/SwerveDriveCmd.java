@@ -2,10 +2,10 @@ package frc.robot.commands.drivetrain;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSys;
 
-public class SwerveDriveCmd extends CommandBase {
+public class SwerveDriveCmd extends Command {
 
     /**
      * Command to allow for driver input in teleop

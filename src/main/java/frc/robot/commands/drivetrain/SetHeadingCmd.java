@@ -1,10 +1,10 @@
 package frc.robot.commands.drivetrain;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSys;
 
-public class SetHeadingCmd extends CommandBase {
+public class SetHeadingCmd extends Command {
 
     private final SwerveSys swerveSys;
 

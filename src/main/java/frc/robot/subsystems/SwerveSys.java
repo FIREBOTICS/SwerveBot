@@ -12,6 +12,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.CANDevices;
 import frc.robot.Constants.DriveConstants;
@@ -66,18 +67,22 @@ public class SwerveSys extends SubsystemBase {
     }
 
     private double speedFactor = 0.3; //Speed
+    private boolean speedChanged = false;
     public double getSpeedFactor() {
         return speedFactor;
     }
-    public void setSpeedFactor(double speedFactor) {
-        this.speedFactor = speedFactor;
+    public void setSpeedFactor(double newSpeedFactor) {
+        speedChanged = true;
+        this.speedFactor = newSpeedFactor;
+        SmartDashboard.updateValues();
     }
     public void increaseSpeedFactor(double difference) {
-        this.speedFactor += difference;
+        setSpeedFactor(speedFactor + difference);
     }
     public void decreaseSpeedFactor(double difference) {
-        System.out.println("Hello there3");
-        this.speedFactor -= difference;
+        System.out.println(speedFactor);
+        setSpeedFactor(speedFactor - difference);
+        System.out.println(speedFactor);
     }
 
     private boolean isTracking = false;
@@ -126,7 +131,8 @@ public class SwerveSys extends SubsystemBase {
         SmartDashboard.putNumber("rear left CANcoder", rearLeftMod.getCanCoderAngle().getDegrees());
         SmartDashboard.putNumber("rear right CANcoder", rearRightMod.getCanCoderAngle().getDegrees());
 
-        speedFactor = SmartDashboard.getNumber("Speed Percent", speedFactor);
+        if (speedChanged) speedChanged = false;
+        else speedFactor = SmartDashboard.getNumber("Speed Percent", speedFactor);
     }
     
     /**
