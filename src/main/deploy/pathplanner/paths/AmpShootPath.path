@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.0,
-        "y": 5.5
+        "x": 1.45,
+        "y": 7.3
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.1,
-        "y": 5.5
+        "x": 1.55,
+        "y": 7.3
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Amp Start"
     },
     {
       "anchor": {
-        "x": 2.0,
-        "y": 5.5
+        "x": 1.83,
+        "y": 7.65
       },
       "prevControl": {
-        "x": 1.9,
-        "y": 5.5
+        "x": 1.73,
+        "y": 7.65
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Amp Shooting"
     }
   ],
   "rotationTargets": [],

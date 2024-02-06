@@ -3,7 +3,7 @@ package frc.robot.commands.drivetrain;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.SwerveSys;
+import frc.robot.subsystems.SwerveDrive;
 
 public class SwerveDriveCmd extends Command {
 
@@ -12,7 +12,7 @@ public class SwerveDriveCmd extends Command {
      * Can't be inlined efficiently if we want to edit the inputs in any way (deadband, square, etc.)
      */
 
-    private final SwerveSys swerveSys;
+    private final SwerveDrive swerveDrive;
 
     /**
      * Joysticks return DoubleSuppliers when the get methods are called
@@ -34,17 +34,17 @@ public class SwerveDriveCmd extends Command {
      * @param strafe The commanded left/right lateral motion.
      * @param rot The commanded rotational motion.
      * @param isFieldRelative Whether the commanded inputs are field- or robot-oriented.
-     * @param swerveSys The required SwerveSys.
+     * @param swerveDrive The required SwerveDrive.
      */
     public SwerveDriveCmd(
         DoubleSupplier drive, 
         DoubleSupplier strafe, 
         DoubleSupplier rot,
         boolean isFieldRelative,
-        SwerveSys swerveSys
+        SwerveDrive swerveDrive
     ) {
 
-        this.swerveSys = swerveSys;
+        this.swerveDrive = swerveDrive;
 
         this.drive = drive;
         this.strafe = strafe;
@@ -52,7 +52,7 @@ public class SwerveDriveCmd extends Command {
 
         this.isFieldRelative = isFieldRelative;
 
-        addRequirements(swerveSys);
+        addRequirements(swerveDrive);
 
     }
     
@@ -74,7 +74,7 @@ public class SwerveDriveCmd extends Command {
         double rot = this.rot.getAsDouble();
         rot *= Math.abs(rot);
 
-        swerveSys.drive(
+        swerveDrive.drive(
             -drive,
             -strafe,
             -rot,

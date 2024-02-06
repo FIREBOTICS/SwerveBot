@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 5.5
+        "x": 1.83,
+        "y": 6.966174389491637
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.0,
-        "y": 5.5
+        "x": 1.9300000000000006,
+        "y": 6.966174389491637
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Amp Post-Spin"
     },
     {
       "anchor": {
         "x": 3.0,
-        "y": 5.5
+        "y": 6.97
       },
       "prevControl": {
-        "x": 2.0,
-        "y": 5.5
+        "x": 2.8999999999999995,
+        "y": 6.97
       },
       "nextControl": null,
       "isLocked": false,
@@ -39,11 +39,14 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0,
+    "rotation": 90.0,
     "rotateFast": false
   },
   "reversed": false,
   "folder": null,
-  "previewStartingState": null,
+  "previewStartingState": {
+    "rotation": 90.0,
+    "velocity": 0
+  },
   "useDefaultConstraints": false
 }

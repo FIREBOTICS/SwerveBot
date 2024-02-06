@@ -1,113 +1,130 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.sensors.AbsoluteSensorRange;
-import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.DriveConstants;;
 
-/**
- * Class to represent and handle a swerve module
- * A module's state is measured by a CANCoder for the absolute position, integrated CANEncoder for relative position
- * for both steeration and linear movement
- */
 public class SwerveModule extends SubsystemBase {
+    private final CANSparkMax driveMotor;
+    private final CANSparkMax steerMotor;
 
-    private final CANSparkMax driveMtr;
-    private final CANSparkMax steerMtr;
+    private final RelativeEncoder driveEncoder;
+    private final RelativeEncoder steerEncoder;
 
-    private final RelativeEncoder driveEnc;
-    private final RelativeEncoder steerEnc;
+    private final CANcoder canCoder;
 
-    private final CANCoder canCoder;
-
-    // absolute offset for the CANCoder so that the wheels can be aligned when the robot is turned on
     private final Rotation2d offset;
 
-    private final SparkMaxPIDController steerController;
-    private final SparkMaxPIDController driveController;
+    private final SparkPIDController steerController;
+    private final SparkPIDController driveController;
 
     /**
      * Constructs a new SwerveModule.
      * 
      * <p>SwerveModule represents and handles a swerve module.
      * 
-     * @param driveMtrId CAN ID of the NEO drive motor.
-     * @param steerMtrId CAN ID of the NEO steeration motor.
+     * @param driveMotorId CAN ID of the NEO drive motor.
+     * @param steerMotorId CAN ID of the NEO steer motor.
+     * @param driveMotorInverted Drive NEO is inverted.
+     * @param steerMotorInverted Steer NEO is inverted.
      * @param canCoderId CAN ID of the CANCoder.
-     * @param measuredOffsetRadians Offset of CANCoder reading from forward.
+     * @param steerOffsetRadians Offset of CANCoder reading from forward.
      */
-    public SwerveModule(int driveMtrId, int steerMtrId, int canCoderId, double measuredOffsetRadians, boolean driveMrtInverted) {
+    public SwerveModule(int moduleID, boolean driveMotorInverted, boolean steerMotorInverted, double steerOffsetRadians) {
+        moduleID *= 10;
+        int driveMotorId = moduleID+1;
+        int steerMotorId = moduleID+2;
+        int canCoderId = moduleID+3;
+        
+        driveMotor = new CANSparkMax(driveMotorId,MotorType.kBrushless);
+        steerMotor = new CANSparkMax(steerMotorId,MotorType.kBrushless);
 
-        driveMtr = new CANSparkMax(driveMtrId, MotorType.kBrushless);
-        steerMtr = new CANSparkMax(steerMtrId, MotorType.kBrushless);
+        driveMotor.restoreFactoryDefaults();
+        steerMotor.restoreFactoryDefaults();
+        driveMotor.setInverted(driveMotorInverted);
+        steerMotor.setInverted(steerMotorInverted);
+        driveMotor.setIdleMode(IdleMode.kBrake);
+        steerMotor.setIdleMode(IdleMode.kCoast);
+        driveMotor.setSmartCurrentLimit(DriveConstants.driveCurrentLimitAmps);
 
-        driveMtr.restoreFactoryDefaults();
-        steerMtr.restoreFactoryDefaults();
-        steerMtr.setInverted(true);
+        driveEncoder = driveMotor.getEncoder();
+        steerEncoder = steerMotor.getEncoder();
 
-        driveMtr.setInverted(driveMrtInverted);
+        canCoder = new CANcoder(canCoderId);
 
-        driveEnc = driveMtr.getEncoder();
-        steerEnc = steerMtr.getEncoder();
+        offset = new Rotation2d(steerOffsetRadians);
 
-        canCoder = new CANCoder(canCoderId);
-
-        offset = new Rotation2d(measuredOffsetRadians);
-
-        driveMtr.setIdleMode(IdleMode.kBrake);
-        steerMtr.setIdleMode(IdleMode.kCoast);
-
-        driveMtr.setSmartCurrentLimit(DriveConstants.driveCurrentLimitAmps);
-
-        steerController = steerMtr.getPIDController();
-        driveController = driveMtr.getPIDController();
+        steerController = steerMotor.getPIDController();
+        driveController = driveMotor.getPIDController();
 
         steerController.setP(DriveConstants.steerkP);
         steerController.setI(DriveConstants.steerkI);
         steerController.setD(DriveConstants.steerkD);
-  
 
         //set the output of the drive encoder to be in radians for linear measurement
-        driveEnc.setPositionConversionFactor(DriveConstants.driveMetersPerEncRev);
+        driveEncoder.setPositionConversionFactor(DriveConstants.driveMetersPerEncRev);
 
         //set the output of the drive encoder to be in radians per second for velocity measurement
-        driveEnc.setVelocityConversionFactor(DriveConstants.driveMetersPerSecPerRPM);
+        driveEncoder.setVelocityConversionFactor(DriveConstants.driveMetersPerSecPerRPM);
 
         //set the output of the steeration encoder to be in radians
-        steerEnc.setPositionConversionFactor(DriveConstants.steerRadiansPerEncRev);
+        steerEncoder.setPositionConversionFactor(DriveConstants.steerRadiansPerEncRev);
 
+
+        CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
+        canCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1; //TODO: I HAVE NO IDEA IF THIS WORKS
         //configure the CANCoder to output in unsigned (wrap around from 360 to 0 degrees)
-        canCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
+        canCoder.getConfigurator().apply(canCoderConfig);
 
         initSteerOffset();
     }
-
+    
     /**
+    * Initializes the steer motor encoder to the value of the CANCoder, accounting for the offset.
+    */
+    public void initSteerOffset() {
+       steerEncoder.setPosition(getCanCoderAngle().getRadians());
+    }
+    
+    /**
+     * Returns the current angle of the module between 0 and 2 * PI.
+     * 
+     * @return The current angle of the module between 0 and 2 * PI.
+     */
+    public Rotation2d getCanCoderAngle() {        
+        double unsignedAngle = (Units.rotationsToRadians((canCoder.getAbsolutePosition().refresh().getValue())) - offset.getRadians()) % (2 * Math.PI);
+        return new Rotation2d(unsignedAngle);
+    }
+
+        /**
      * Returns the current position of the module.
      *
      * @return The current position of the module.
      */
     public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(
-        driveEnc.getPosition(), getCanCoderAngle());
+        driveEncoder.getPosition(), getCanCoderAngle());
     }
 
     /**
      * Resets the distance traveled by the module.
      */
     public void resetDistance() {
-        driveEnc.setPosition(0.0);
+        driveEncoder.setPosition(0.0);
     }
 
     /**
@@ -116,22 +133,7 @@ public class SwerveModule extends SubsystemBase {
      * @return The current drive distance of the module.
      */
     public double getDriveDistanceMeters() {
-
-        return driveEnc.getPosition();
-
-    }
-    
-    /**
-     * Returns the current angle of the module between 0 and 2 * PI.
-     * 
-     * @return The current angle of the module between 0 and 2 * PI.
-     */
-    public Rotation2d getCanCoderAngle() {
-
-        double unsignedAngle = (Units.degreesToRadians(canCoder.getAbsolutePosition()) - offset.getRadians()) % (2 * Math.PI);
-
-        return new Rotation2d(unsignedAngle);
-
+        return driveEncoder.getPosition();
     }
 
     /**
@@ -140,9 +142,7 @@ public class SwerveModule extends SubsystemBase {
      * @return The curretn absolute angle of the module.
      */
     public Rotation2d getSteerEncAngle() {
-
-        return new Rotation2d(steerEnc.getPosition());
-
+        return new Rotation2d(steerEncoder.getPosition());
     }
 
     /**
@@ -151,15 +151,12 @@ public class SwerveModule extends SubsystemBase {
      * @return The current velocity of the module in meters per second.
      */
     public double getCurrentVelocityMetersPerSecond() {
-
-        return driveEnc.getVelocity();
-        
+        return driveEncoder.getVelocity();
     }
 
     public double getRelativeVelocityMetersPerSecond(double thetaRad) {
         double rel = getCanCoderAngle().getDegrees() % 90.0;
         if(rel > 90.0 && rel < 270.0) rel *= -1.0;
-        
         return getCurrentVelocityMetersPerSecond() * (rel / 90.0);
     }
 
@@ -167,28 +164,14 @@ public class SwerveModule extends SubsystemBase {
      * Calculates the angle motor setpoint based on the desired angle and the current angle measurement.
      */
     public double calculateAdjustedAngle(double targetAngle, double currentAngle) {
-
         double modAngle = currentAngle % (2.0 * Math.PI);
-
         if (modAngle < 0.0) modAngle += 2.0 * Math.PI;
-        
         double newTarget = targetAngle + currentAngle - modAngle;
-
         if (targetAngle - modAngle > Math.PI) newTarget -= 2.0 * Math.PI;
         else if (targetAngle - modAngle < -Math.PI) newTarget += 2.0 * Math.PI;
-
         return newTarget;
-
     }
 
-    /**
-     * Initializes the steeration motor encoder to the value of the CANCoder, accounting for the offset.
-     */
-    public void initSteerOffset() {
-
-        steerEnc.setPosition(getCanCoderAngle().getRadians());
-
-    }
 
     /**
      * Sets the desired state of the swerve module and optimizes it.
@@ -223,7 +206,7 @@ public class SwerveModule extends SubsystemBase {
  */
 
         if(isOpenLoop) {
-            driveMtr.set(desiredState.speedMetersPerSecond / DriveConstants.kFreeMetersPerSecond);
+            driveMotor.set(desiredState.speedMetersPerSecond / DriveConstants.kFreeMetersPerSecond);
         }
         else {
             double speedMetersPerSecond = desiredState.speedMetersPerSecond * DriveConstants.maxDriveSpeedMetersPerSec;
@@ -238,7 +221,6 @@ public class SwerveModule extends SubsystemBase {
     }
 
     public void setDriveCurrentLimit(int amps) {
-        driveMtr.setSmartCurrentLimit(amps);
+        driveMotor.setSmartCurrentLimit(amps);
     }
-
 }

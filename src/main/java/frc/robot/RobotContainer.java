@@ -1,94 +1,101 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot;
 
+import frc.robot.Constants.ControllerConstants;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.drivetrain.SwerveDriveCmd;
+import frc.robot.subsystems.SwerveDrive;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.ControllerConstants;
-import frc.robot.commands.drivetrain.IncreaseSpdCmd;
-import frc.robot.commands.drivetrain.DecreaseSpdCmd;
-import frc.robot.commands.drivetrain.LockCmd;
-import frc.robot.commands.drivetrain.ResetHeadingCmd;
-import frc.robot.commands.drivetrain.SwerveDriveCmd;
-import frc.robot.subsystems.SwerveSys;
 
+/**
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * subsystems, commands, and trigger mappings) should be declared here.
+ */
 public class RobotContainer {
-    
-    // Initialize subsystems.
-    private final SwerveSys swerveSys = new SwerveSys();
+  // Initialize subsystems.
+  private final SwerveDrive swerveDrive = new SwerveDrive();
 
-    // Initialize joysticks.
-    private final XboxController driverController = new XboxController(ControllerConstants.driverGamepadPort);
+  // Initialize auto selector.
+  SendableChooser<Command> autoSelector = new SendableChooser<Command>();
 
-    private final JoystickButton driverMenuBtn = new JoystickButton(driverController, 8);
+  private final CommandXboxController m_driverController =
+    new CommandXboxController(ControllerConstants.driverControllerPort);
 
-    private final Trigger driverLeftTriggerBtn =
-        new Trigger(() -> driverController.getLeftTriggerAxis() > ControllerConstants.triggerPressedThreshhold);
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  public RobotContainer() {
+    // Configure the trigger bindings
+    configureBindings();
+    SmartDashboard.putData("auto selector", autoSelector);
+  }
 
-    private final Trigger driverSpeedUpButton = 
-        new Trigger(() -> driverController.getXButtonPressed());
+  /**
+   * Use this method to define your trigger->command mappings. Triggers can be created via the
+   * {@link Trigger#Trigger (java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * predicate, or via the named factories in {@link
+   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
+   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * joysticks}.
+   */
+   private void configureBindings() {
 
-    private final Trigger driverSlowDownButton = 
-        new Trigger(() -> driverController.getAButtonPressed());
 
-    // Initialize auto selector.
-    SendableChooser<Command> autoSelector = new SendableChooser<Command>();
+    /*
+    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
+    new Trigger(m_exampleSubsystem::exampleCondition)
+        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    */
 
-    public RobotContainer() {
-        SmartDashboard.putData("auto selector", autoSelector);
+    // Schedule `lock` when the Xbox controller's left trigger is beyond the threshold,
+    // cancelling on release.
+    m_driverController.leftTrigger(ControllerConstants.triggerPressedThreshhold).whileTrue(swerveDrive.lockCommand());
+    m_driverController.x().onTrue(swerveDrive.speedUpCommand(0.1));
+    m_driverController.a().onTrue(swerveDrive.slowDownCommand(0.1));
+    swerveDrive.setDefaultCommand(
+        swerveDrive.driveCommand(
+          () -> deadband(m_driverController.getLeftY()),
+          () -> deadband(m_driverController.getLeftX()),
+          () -> deadband(m_driverController.getRightX()),
+          true //Switch to False for Chairbot Mode
+        )
+    );
+  }
 
-        configDriverBindings();
-    }
+  /**
+   * Deadbands inputs to eliminate tiny unwanted values from the joysticks or gamepad sticks.
+   * <p>If the distance between the input and zero is less than the deadband amount, the output will be zero.
+   * Otherwise, the value will not change.
+   * 
+   * @param input The controller value to deadband.
+   * have different deadbands.
+   * @return The deadbanded controller value.
+   */
+  public double deadband(double value) {
+    if (Math.abs(value) < ControllerConstants.joystickDeadband)
+        return 0.0;
+    return value;
+  }
 
-    public void configDriverBindings() {
-        swerveSys.setDefaultCommand(
-                new SwerveDriveCmd(
-                () -> deadband(driverController.getLeftY()),
-                () -> deadband(driverController.getLeftX()),
-                () -> deadband(driverController.getRightX()),
-                true, //Switch to False for Chairbot Mode
-                swerveSys
-            )
-        );
-        driverMenuBtn.onTrue(new ResetHeadingCmd(swerveSys));
-
-        driverLeftTriggerBtn.whileTrue(new LockCmd(swerveSys));
-
-        driverSpeedUpButton.onTrue(new IncreaseSpdCmd(
-            0.1,
-            swerveSys)
-        );
-        driverSlowDownButton.onTrue(new DecreaseSpdCmd(
-            0.1, 
-            swerveSys)
-        );
-    }
-
-    public Command getAutonomousCommand() {
-        return autoSelector.getSelected();
-    }
-
-    /**
-     * Deadbands inputs to eliminate tiny unwanted values from the joysticks or gamepad sticks.
-     * <p>If the distance between the input and zero is less than the deadband amount, the output will be zero.
-     * Otherwise, the value will not change.
-     * 
-     * @param input The controller value to deadband.
-     * have different deadbands.
-     * @return The deadbanded controller value.
-     */
-    public double deadband(double value) {
-
-        if (Math.abs(value) < ControllerConstants.joystickDeadband)
-            return 0.0;
-        
-        return value;
-    }
-
-    public void updateInterface() {
-        SmartDashboard.putNumber("heading degrees", swerveSys.getHeading().getDegrees());
-        SmartDashboard.putNumber("speed m//s", swerveSys.getAverageDriveVelocityMetersPerSecond());
-    }
+  /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
+  public Command getAutonomousCommand() {
+    // An example command will be run in autonomous
+    return new Command() {
+      
+    };
+  }
 }
