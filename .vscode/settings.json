@@ -25,9 +25,5 @@
       }
     },
   ],
-  "java.test.defaultConfig": "WPIlibUnitTests",
-  "editor.cursorBlinking": "blink",
-  "editor.cursorSmoothCaretAnimation": "on",
-  "diffEditor.codeLens": false,
-  "java.inlayHints.parameterNames.enabled": "none"
+  "java.test.defaultConfig": "WPIlibUnitTests"
 }
