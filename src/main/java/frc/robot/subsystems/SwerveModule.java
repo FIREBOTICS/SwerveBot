@@ -1,9 +1,9 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
@@ -33,15 +33,16 @@ public class SwerveModule extends SubsystemBase {
     private final SparkPIDController driveController;
 
     /**
-     * Constructs a new SwerveModule.
+     * Create a new SwerveModule.
      * 
-     * <p>SwerveModule represents and handles a swerve module.
+     * <p> Tracks and controls a single swerve module
      * 
-     * @param driveMotorId CAN ID of the NEO drive motor.
-     * @param steerMotorId CAN ID of the NEO steer motor.
+     * <p> IDs: Front left - 1, front right - 2, back left - 3, back right - 4
+     * 
+     * 
+     * @param moduleId           Module number, used to determine SPARKMax and CanCoder IDs
      * @param driveMotorInverted Drive NEO is inverted.
      * @param steerMotorInverted Steer NEO is inverted.
-     * @param canCoderId CAN ID of the CANCoder.
      * @param steerOffsetRadians Offset of CANCoder reading from forward.
      */
     public SwerveModule(int moduleID, boolean driveMotorInverted, boolean steerMotorInverted, double steerOffsetRadians) {
@@ -60,6 +61,7 @@ public class SwerveModule extends SubsystemBase {
         driveMotor.setIdleMode(IdleMode.kBrake);
         steerMotor.setIdleMode(IdleMode.kCoast);
         driveMotor.setSmartCurrentLimit(DriveConstants.driveCurrentLimitAmps);
+        driveMotor.setSmartCurrentLimit(DriveConstants.steerCurrentLimitAmps);
 
         driveEncoder = driveMotor.getEncoder();
         steerEncoder = steerMotor.getEncoder();
@@ -86,8 +88,8 @@ public class SwerveModule extends SubsystemBase {
 
 
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
-        canCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1; //TODO: I HAVE NO IDEA IF THIS WORKS
-        //configure the CANCoder to output in unsigned (wrap around from 360 to 0 degrees)
+        canCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
+        canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         canCoder.getConfigurator().apply(canCoderConfig);
 
         initSteerOffset();
@@ -139,7 +141,7 @@ public class SwerveModule extends SubsystemBase {
     /**
      * Returns the current absolute angle of the module from the steeration motor encoder.
      * 
-     * @return The curretn absolute angle of the module.
+     * @return The current absolute angle of the module.
      */
     public Rotation2d getSteerEncAngle() {
         return new Rotation2d(steerEncoder.getPosition());
@@ -196,15 +198,6 @@ public class SwerveModule extends SubsystemBase {
             ControlType.kPosition
         );
         
-         /*
-        steerController.setReference(
-             calculateAdjustedAngle(
-                 0,
-                 getSteerEncAngle().getRadians()),
-             ControlType.kPosition
-         );
- */
-
         if(isOpenLoop) {
             driveMotor.set(desiredState.speedMetersPerSecond / DriveConstants.kFreeMetersPerSecond);
         }
@@ -222,5 +215,9 @@ public class SwerveModule extends SubsystemBase {
 
     public void setDriveCurrentLimit(int amps) {
         driveMotor.setSmartCurrentLimit(amps);
+    }
+
+    public void setSteerCurrentLimit(int amps) {
+        steerMotor.setSmartCurrentLimit(amps);
     }
 }

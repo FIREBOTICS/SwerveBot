@@ -5,15 +5,12 @@
 package frc.robot;
 
 import frc.robot.Constants.ControllerConstants;
-import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.drivetrain.SwerveDriveCmd;
 import frc.robot.subsystems.SwerveDrive;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -23,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  private boolean isFieldOriented = true;
+
   // Initialize subsystems.
   private final SwerveDrive swerveDrive = new SwerveDrive();
 
@@ -67,8 +66,8 @@ public class RobotContainer {
           () -> deadband(m_driverController.getLeftY()),
           () -> deadband(m_driverController.getLeftX()),
           () -> deadband(m_driverController.getRightX()),
-          true //Switch to False for Chairbot Mode
-        )
+          () -> isFieldOriented
+          )
     );
   }
 
@@ -98,4 +97,10 @@ public class RobotContainer {
       
     };
   }
+
+  public Command toggleFieldOrientedCommand() {
+    return Commands.runOnce(
+      () -> isFieldOriented = !isFieldOriented);
+  }
+
 }

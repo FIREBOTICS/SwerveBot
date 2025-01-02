@@ -28,6 +28,8 @@ public final class Constants {
     public static final double steerkD = 0;
 
     public static final int driveCurrentLimitAmps = 35;
+    public static final int steerCurrentLimitAmps = 25;
+
     
     /**
      * The track width from wheel center to wheel center.
