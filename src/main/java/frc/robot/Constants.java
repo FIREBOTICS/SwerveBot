@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.RobotConfig;
+
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -18,8 +20,12 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+  public static class ControllerConstants {
+    public static final int driverControllerPort = 0;
+    public static final int codriverControllerPort = 1;
+    
+    public static final double joystickDeadband = 0.15;
+    public static final double triggerPressedThreshhold = 0.25;
   }
 
   public static class DriveConstants {
@@ -91,6 +97,19 @@ public final class Constants {
     public static final double kaVoltSecsPerMeterSq = 0.0;
     public static final SimpleMotorFeedforward driveFF = new SimpleMotorFeedforward(ksVolts, kvVoltSecsPerMeter, kaVoltSecsPerMeterSq);
 
+    // Load the RobotConfig from the GUI settings. You should probably
+    // store this in your Constants file
+    public static RobotConfig PPRobotConfig;
+    { //i do not know why this is necessary - probably because it's running non-declaration code in a class definition
+      try {
+        PPRobotConfig = RobotConfig.fromGUISettings();
+      } catch (Exception e) {
+        // Handle exception as needed
+        e.printStackTrace();
+      }
+    };
+
+
   }
 
   public static final class CANDevices {
@@ -139,11 +158,4 @@ public final class Constants {
     public static final boolean  backRightSteerInverted = false;
   }
   
-  public static final class ControllerConstants {
-    public static final int driverControllerPort = 0;
-
-    public static final double joystickDeadband = 0.15;
-    public static final double triggerPressedThreshhold = 0.25;
-  }
-
 }

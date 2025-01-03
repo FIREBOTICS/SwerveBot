@@ -30,6 +30,8 @@ public class RobotContainer {
 
   private final CommandXboxController m_driverController =
     new CommandXboxController(ControllerConstants.driverControllerPort);
+  private final CommandXboxController m_codriverController =
+    new CommandXboxController(ControllerConstants.codriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -63,9 +65,9 @@ public class RobotContainer {
     m_driverController.a().onTrue(swerveDrive.slowDownCommand(0.1));
     swerveDrive.setDefaultCommand(
         swerveDrive.driveCommand(
-          () -> deadband(m_driverController.getLeftY()),
-          () -> deadband(m_driverController.getLeftX()),
-          () -> deadband(m_driverController.getRightX()),
+          () -> -deadband(m_driverController.getLeftY()),
+          () -> -deadband(m_driverController.getLeftX()),
+          () -> -deadband(m_driverController.getRightX()),
           () -> isFieldOriented
           )
     );
@@ -73,11 +75,11 @@ public class RobotContainer {
 
   /**
    * Deadbands inputs to eliminate tiny unwanted values from the joysticks or gamepad sticks.
-   * <p>If the distance between the input and zero is less than the deadband amount, the output will be zero.
+
+   * <p> If the distance between the input and zero is less than the deadband amount, the output will be zero.
    * Otherwise, the value will not change.
    * 
-   * @param input The controller value to deadband.
-   * have different deadbands.
+   * @param value The controller value to deadband.
    * @return The deadbanded controller value.
    */
   public double deadband(double value) {
@@ -93,9 +95,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return new Command() {
-      
-    };
+    return null;
   }
 
   public Command toggleFieldOrientedCommand() {

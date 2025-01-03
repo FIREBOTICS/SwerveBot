@@ -1,2 +1,2 @@
 # SwerveBot
- 2023 Offseason Swerve Chassis
+Swerve chassis code, for use in demos and as a base for season code

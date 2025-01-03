@@ -3,11 +3,10 @@ package frc.robot.subsystems;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-import com.kauailabs.navx.frc.AHRS;
+import com.studica.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,6 +21,7 @@ import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.*;
 
 public class SwerveDrive extends SubsystemBase {
@@ -50,7 +50,7 @@ public class SwerveDrive extends SubsystemBase {
             CANDevices.backRightSteerInverted,  
             DriveConstants.backRightModuleOffset);
 
-    private final AHRS navX = new AHRS(SerialPort.Port.kUSB);
+    private final AHRS navX = new AHRS(AHRS.NavXComType.kUSB1);
 
     private boolean isLocked = false;
     private boolean isFieldOriented = false;
@@ -392,19 +392,17 @@ public class SwerveDrive extends SubsystemBase {
         Preferences.initDouble(speedFactorKey, speedFactor);
 
         // Default PathPlanner config
-        AutoBuilder.configureHolonomic(
+        AutoBuilder.configure(
                 this::getPose, // Robot pose supplier
                 this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
                 this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-                new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your
+                (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+                new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your
                                                  // Constants class
                         new PIDConstants(1, 0, 0), // Translation PID constants
-                        new PIDConstants(1, 0, 0), // Rotation PID constants
-                        4.5, // Max module speed, in m/s
-                        0.4, // Drive base radius in meters. Distance from robot center to furthest module.
-                        new ReplanningConfig() // Default path replanning config. See the API for the options here
+                        new PIDConstants(1, 0, 0) // Rotation PID constants
                 ),
+                Constants.DriveConstants.PPRobotConfig,
                 () -> {
                     // Boolean supplier that controls when the path will be mirrored for the red
                     // alliance
