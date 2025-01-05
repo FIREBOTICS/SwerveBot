@@ -75,7 +75,7 @@ public final class Constants {
 
     public static final double steerRadiansPerEncRev = 2 * Math.PI * DriveConstants.steerMtrGearReduction;
 
-    public static final double kFreeMetersPerSecond = 5600 * driveMetersPerSecPerRPM;
+    public static final double freeMetersPerSecond = 5600 * driveMetersPerSecPerRPM;
 
     public static final double steerMtrMaxSpeedRadPerSec = 2.0;
     public static final double steerMtrMaxAccelRadPerSecSq = 1.0;
@@ -100,7 +100,7 @@ public final class Constants {
     // Load the RobotConfig from the GUI settings. You should probably
     // store this in your Constants file
     public static RobotConfig PPRobotConfig;
-    { //i do not know why this is necessary - probably because it's running non-declaration code in a class definition
+    { // I think we need braces because it's running non-declaration code in a class definition and not a function but I'm not sure
       try {
         PPRobotConfig = RobotConfig.fromGUISettings();
       } catch (Exception e) {

@@ -1,34 +1,26 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Radian;
-import static edu.wpi.first.units.Units.Radians;
-
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.ClosedLoopOutputType;
-// import com.ctre.phoenix6.configs.MagnetSensorConfigs.AbsoluteSensorDiscontinuityPoint;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.reduxrobotics.sensors.canandmag.Canandmag;
+import com.reduxrobotics.sensors.canandmag.CanandmagSettings;
 import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.*;
-import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
-public class SwerveModule extends SubsystemBase {
+public class ReduxSwerveModule extends SubsystemBase {
     private final SparkMax driveMotor;
     private final SparkMax steerMotor;
 
@@ -41,7 +33,8 @@ public class SwerveModule extends SubsystemBase {
     private final SparkMaxConfig driveConfig = new SparkMaxConfig();
     private final SparkMaxConfig steerConfig = new SparkMaxConfig();
 
-    private final CANcoder canCoder;
+    private final Canandmag canandmag;
+    private final CanandmagSettings canandmagSettings = new CanandmagSettings();
     private final Rotation2d offset;
 
     /**
@@ -52,19 +45,19 @@ public class SwerveModule extends SubsystemBase {
      * <p> IDs: Front left - 1, front right - 2, back left - 3, back right - 4
      * 
      * 
-     * @param moduleId           Module number, used to determine SPARKMax and CanCoder IDs
+     * @param moduleId           Module number, used to determine SPARKMax and Canandmag IDs
      * @param driveMotorInverted Drive NEO is inverted.
      * @param steerMotorInverted Steer NEO is inverted.
-     * @param steerOffsetRadians Offset of CANCoder reading from forward.
+     * @param steerOffsetRadians Offset of Canandmag reading from forward.
      */
-    public SwerveModule(int moduleID, boolean driveMotorInverted, boolean steerMotorInverted, double steerOffsetRadians) {
+    public ReduxSwerveModule(int moduleID, boolean driveMotorInverted, boolean steerMotorInverted, double steerOffsetRadians) {
         moduleID *= 10;
-        int driveMotorId = moduleID+1;
-        int steerMotorId = moduleID+2;
-        int canCoderId = moduleID+3;
+        int driveMotorID = moduleID+1;
+        int steerMotorID = moduleID+2;
+        int canandmagID = moduleID+3;
         
-        driveMotor = new SparkMax(driveMotorId,MotorType.kBrushless);
-        steerMotor = new SparkMax(steerMotorId,MotorType.kBrushless);
+        driveMotor = new SparkMax(driveMotorID,MotorType.kBrushless);
+        steerMotor = new SparkMax(steerMotorID,MotorType.kBrushless);
 
         driveConfig
             .inverted(driveMotorInverted)
@@ -96,23 +89,18 @@ public class SwerveModule extends SubsystemBase {
         steerController = steerMotor.getClosedLoopController();
         driveController = driveMotor.getClosedLoopController();
 
-        canCoder = new CANcoder(canCoderId);
+        canandmag = new Canandmag(canandmagID);
 
         offset = new Rotation2d(steerOffsetRadians);
-
-        CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
-        canCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-        canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        canCoder.getConfigurator().apply(canCoderConfig);
 
         initSteerOffset();
     }
     
     /**
-    * Initializes the steer motor encoder to the value of the CANCoder, accounting for the offset.
+    * Initializes the steer motor encoder to the value of the Canandmag, accounting for the offset.
     */
     public void initSteerOffset() {
-       steerEncoder.setPosition(getCanCoderAngle().getRadians());
+       steerEncoder.setPosition(getCanandmagAngle().getRadians());
     }
     
     /**
@@ -120,12 +108,8 @@ public class SwerveModule extends SubsystemBase {
      * 
      * @return The current angle of the module between 0 and 2 * PI.
      */
-    public Rotation2d getCanCoderAngle() {        
-        double unsignedAngle =
-            canCoder.getAbsolutePosition().getValue()
-                .minus(offset.getMeasure())
-                .in(Radians) % (2 * Math.PI);
-
+    public Rotation2d getCanandmagAngle() {        
+        double unsignedAngle = (Units.rotationsToRadians(canandmag.getAbsPosition()) - offset.getRadians()) % (2 * Math.PI);
         return new Rotation2d(unsignedAngle);
     }
 
@@ -136,7 +120,7 @@ public class SwerveModule extends SubsystemBase {
      */
     public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(
-        driveEncoder.getPosition(), getCanCoderAngle());
+        driveEncoder.getPosition(), getCanandmagAngle());
     }
 
     /**
@@ -174,7 +158,7 @@ public class SwerveModule extends SubsystemBase {
     }
 
     public double getRelativeVelocityMetersPerSecond(double thetaRad) {
-        double rel = getCanCoderAngle().getDegrees() % 90.0;
+        double rel = getCanandmagAngle().getDegrees() % 90.0;
         if(rel > 90.0 && rel < 270.0) rel *= -1.0;
         return getCurrentVelocityMetersPerSecond() * (rel / 90.0);
     }
@@ -205,7 +189,7 @@ public class SwerveModule extends SubsystemBase {
         
         // Optimizes speed and angle to minimize change in heading
         // (e.g. module turns 1 degree and reverses drive direction to get from 90 degrees to -89 degrees)
-        desiredState = SwerveModuleState.optimize(desiredState, getSteerEncAngle());
+        desiredState.optimize(getSteerEncAngle());
 
 
         steerController.setReference(
@@ -216,7 +200,7 @@ public class SwerveModule extends SubsystemBase {
         );
         
         if(isOpenLoop) {
-            driveMotor.set(desiredState.speedMetersPerSecond / DriveConstants.kFreeMetersPerSecond);
+            driveMotor.set(desiredState.speedMetersPerSecond / DriveConstants.freeMetersPerSecond);
         }
         else {
             double speedMetersPerSecond = desiredState.speedMetersPerSecond * DriveConstants.maxDriveSpeedMetersPerSec;
@@ -224,7 +208,7 @@ public class SwerveModule extends SubsystemBase {
             driveController.setReference(
                 speedMetersPerSecond,
                 ControlType.kVelocity,
-                0, 
+                ClosedLoopSlot.kSlot0,
                 DriveConstants.driveFF.calculate(speedMetersPerSecond)
             );
         }
@@ -243,5 +227,11 @@ public class SwerveModule extends SubsystemBase {
     public void flashMotorConfigs() {
         driveMotor.configure(driveConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         steerMotor.configure(steerConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
+    public void isTestMode(boolean isTestMode) {
+        canandmagSettings.setDisableZeroButton(!isTestMode);
+        canandmag.setSettings(canandmagSettings, 0.5, 3);
+        canandmag.setPartyMode(isTestMode ? 10 : 0); // if true, blink at 2Hz, else 0
     }
 }

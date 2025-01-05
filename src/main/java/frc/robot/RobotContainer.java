@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -28,9 +29,9 @@ public class RobotContainer {
   // Initialize auto selector.
   SendableChooser<Command> autoSelector = new SendableChooser<Command>();
 
-  private final CommandXboxController m_driverController =
+  private final CommandXboxController driverController =
     new CommandXboxController(ControllerConstants.driverControllerPort);
-  private final CommandXboxController m_codriverController =
+  private final CommandXboxController codriverController =
     new CommandXboxController(ControllerConstants.codriverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -50,27 +51,23 @@ public class RobotContainer {
    * joysticks}.
    */
    private void configureBindings() {
-
-
-    /*
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
-    */
-
     // Schedule `lock` when the Xbox controller's left trigger is beyond the threshold,
     // cancelling on release.
-    m_driverController.leftTrigger(ControllerConstants.triggerPressedThreshhold).whileTrue(swerveDrive.lockCommand());
-    m_driverController.x().onTrue(swerveDrive.speedUpCommand(0.1));
-    m_driverController.a().onTrue(swerveDrive.slowDownCommand(0.1));
+    driverController.leftTrigger(ControllerConstants.triggerPressedThreshhold).whileTrue(swerveDrive.lockCommand());
+    driverController.x().onTrue(swerveDrive.speedUpCommand(0.1));
+    driverController.a().onTrue(swerveDrive.slowDownCommand(0.1));
     swerveDrive.setDefaultCommand(
         swerveDrive.driveCommand(
-          () -> -deadband(m_driverController.getLeftY()),
-          () -> -deadband(m_driverController.getLeftX()),
-          () -> -deadband(m_driverController.getRightX()),
+          () -> -deadband(driverController.getLeftY()),
+          () -> -deadband(driverController.getLeftX()),
+          () -> -deadband(driverController.getRightX()),
           () -> isFieldOriented
           )
     );
+
+    RobotModeTriggers.test().whileTrue(swerveDrive.encodersTestModeCommand());
+
+    SmartDashboard.putData(swerveDrive);
   }
 
   /**

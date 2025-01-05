@@ -17,34 +17,32 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.*;
 
 public class SwerveDrive extends SubsystemBase {
     // Initialize new swerve module objects
-    private final SwerveModule frontLeftMod = new SwerveModule(
+    private final CanCoderSwerveModule frontLeftMod = new CanCoderSwerveModule(
             1,
             CANDevices.frontLeftDriveInverted,
             CANDevices.frontLeftSteerInverted,
             DriveConstants.frontLeftModuleOffset);
 
-    private final SwerveModule frontRightMod = new SwerveModule(
+    private final CanCoderSwerveModule frontRightMod = new CanCoderSwerveModule(
             2,
             CANDevices.frontRightDriveInverted,
             CANDevices.frontRightSteerInverted,
             DriveConstants.frontRightModuleOffset);
 
-    private final SwerveModule backLeftMod = new SwerveModule(
+    private final CanCoderSwerveModule backLeftMod = new CanCoderSwerveModule(
             3,
             CANDevices.backLeftDriveInverted,
             CANDevices.backLeftSteerInverted,
             DriveConstants.backLeftModuleOffset);
 
-    private final SwerveModule backRightMod = new SwerveModule(
+    private final CanCoderSwerveModule backRightMod = new CanCoderSwerveModule(
             4,
             CANDevices.backRightDriveInverted,
             CANDevices.backRightSteerInverted,  
@@ -384,6 +382,22 @@ public class SwerveDrive extends SubsystemBase {
         /* */
     }
 
+    public Command encodersTestModeCommand() {
+        return startEnd(
+            () -> {
+                frontLeftMod.isTestMode(true);
+                frontRightMod.isTestMode(true);
+                backLeftMod.isTestMode(true);
+                backRightMod.isTestMode(true);
+            },
+            () -> {
+                frontLeftMod.isTestMode(false);
+                frontRightMod.isTestMode(false);
+                backLeftMod.isTestMode(false);
+                backRightMod.isTestMode(false);
+            });
+    }
+
 
     /**
      * Create a new Swerve Drive, including 4 modules and a navX
@@ -402,7 +416,7 @@ public class SwerveDrive extends SubsystemBase {
                         new PIDConstants(1, 0, 0), // Translation PID constants
                         new PIDConstants(1, 0, 0) // Rotation PID constants
                 ),
-                Constants.DriveConstants.PPRobotConfig,
+                DriveConstants.PPRobotConfig,
                 () -> {
                     // Boolean supplier that controls when the path will be mirrored for the red
                     // alliance
