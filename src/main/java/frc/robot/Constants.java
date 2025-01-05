@@ -4,11 +4,13 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -100,16 +102,6 @@ public final class Constants {
     // Load the RobotConfig from the GUI settings. You should probably
     // store this in your Constants file
     public static RobotConfig PPRobotConfig;
-    { // I think we need braces because it's running non-declaration code in a class definition and not a function but I'm not sure
-      try {
-        PPRobotConfig = RobotConfig.fromGUISettings();
-      } catch (Exception e) {
-        // Handle exception as needed
-        e.printStackTrace();
-      }
-    };
-
-
   }
 
   public static final class CANDevices {

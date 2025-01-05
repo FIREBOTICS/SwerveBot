@@ -6,6 +6,7 @@ import java.util.function.DoubleSupplier;
 import com.studica.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -404,6 +405,25 @@ public class SwerveDrive extends SubsystemBase {
      */
     public SwerveDrive() {
         Preferences.initDouble(speedFactorKey, speedFactor);
+
+        try {
+            DriveConstants.PPRobotConfig = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            // Handle exception as needed
+            e.printStackTrace();
+            // PPRobotConfig = new RobotConfig(
+            //   0,
+            //   0,
+            //   new ModuleConfig(0,
+            //     0,0,
+            //     DCMotor.getNEO(1),
+            //     0,
+            //     0),
+            //   trackWidth
+            // );
+        }
+
+        // System.out.println(DriveConstants.PPRobotConfig.MOI);
 
         // Default PathPlanner config
         AutoBuilder.configure(
