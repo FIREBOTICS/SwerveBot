@@ -13,6 +13,8 @@ import com.reduxrobotics.sensors.canandmag.Canandmag;
 import com.reduxrobotics.sensors.canandmag.CanandmagSettings;
 import com.revrobotics.RelativeEncoder;
 
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -20,7 +22,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
-public class ReduxSwerveModule extends SubsystemBase {
+@Logged
+public class SwerveModule extends SubsystemBase {
     private final SparkMax driveMotor;
     private final SparkMax steerMotor;
 
@@ -30,10 +33,13 @@ public class ReduxSwerveModule extends SubsystemBase {
     private final SparkClosedLoopController driveController;
     private final SparkClosedLoopController steerController;
 
+    @NotLogged
     private final SparkMaxConfig driveConfig = new SparkMaxConfig();
+    @NotLogged
     private final SparkMaxConfig steerConfig = new SparkMaxConfig();
 
     private final Canandmag canandmag;
+    @NotLogged
     private final CanandmagSettings canandmagSettings = new CanandmagSettings();
     private final Rotation2d offset;
 
@@ -50,7 +56,7 @@ public class ReduxSwerveModule extends SubsystemBase {
      * @param steerMotorInverted Steer NEO is inverted.
      * @param steerOffsetRadians Offset of Canandmag reading from forward.
      */
-    public ReduxSwerveModule(int moduleID, boolean driveMotorInverted, boolean steerMotorInverted, double steerOffsetRadians) {
+    public SwerveModule(int moduleID, boolean driveMotorInverted, boolean steerMotorInverted, double steerOffsetRadians) {
         moduleID *= 10;
         int driveMotorID = moduleID+1;
         int steerMotorID = moduleID+2;
@@ -109,7 +115,8 @@ public class ReduxSwerveModule extends SubsystemBase {
      * @return The current angle of the module between 0 and 2 * PI.
      */
     public Rotation2d getCanandmagAngle() {        
-        double unsignedAngle = (Units.rotationsToRadians(canandmag.getAbsPosition()) - offset.getRadians()) % (2 * Math.PI);
+        double unsignedAngle =
+            (Units.rotationsToRadians(canandmag.getAbsPosition()) - offset.getRadians()) % (2 * Math.PI);
         return new Rotation2d(unsignedAngle);
     }
 

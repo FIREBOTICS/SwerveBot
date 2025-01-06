@@ -1,0 +1,10 @@
+[
+  {
+    "name": "/Preferences/Speed",
+    "type": "double",
+    "value": 0.3,
+    "properties": {
+      "persistent": true
+    }
+  }
+]

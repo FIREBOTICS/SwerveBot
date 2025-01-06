@@ -6,6 +6,12 @@ package frc.robot;
 
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.subsystems.SwerveDrive;
+
+import com.pathplanner.lib.util.PathPlannerLogging;
+
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
+@Logged
 public class RobotContainer {
   private boolean isFieldOriented = true;
 
@@ -29,8 +36,13 @@ public class RobotContainer {
   // Initialize auto selector.
   SendableChooser<Command> autoSelector = new SendableChooser<Command>();
 
+  // Create Field2d object to put on Dashboard
+  private final Field2d field = new Field2d();
+
+  @NotLogged
   private final CommandXboxController driverController =
     new CommandXboxController(ControllerConstants.driverControllerPort);
+  @NotLogged
   private final CommandXboxController codriverController =
     new CommandXboxController(ControllerConstants.codriverControllerPort);
 
@@ -39,6 +51,25 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     SmartDashboard.putData("auto selector", autoSelector);
+
+    SmartDashboard.putData(swerveDrive);
+
+    SmartDashboard.putData(field);
+    // Logging callback for current robot pose
+    PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
+      // Do whatever you want with the pose here
+      field.setRobotPose(pose);
+    });
+    // Logging callback for target robot pose
+    PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
+      // Do whatever you want with the pose here
+      field.getObject("target pose").setPose(pose);
+    });
+    // Logging callback for the active path, this is sent as a list of poses
+    PathPlannerLogging.setLogActivePathCallback((poses) -> {
+      // Do whatever you want with the poses here
+      field.getObject("path").setPoses(poses);
+    });
   }
 
   /**
@@ -67,7 +98,7 @@ public class RobotContainer {
 
     RobotModeTriggers.test().whileTrue(swerveDrive.encodersTestModeCommand());
 
-    SmartDashboard.putData(swerveDrive);
+    // SmartDashboard.putData("swerve", swerveDrive);
   }
 
   /**

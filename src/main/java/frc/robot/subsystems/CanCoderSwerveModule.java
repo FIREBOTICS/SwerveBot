@@ -16,12 +16,15 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.RelativeEncoder;
 
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
+@Logged
 public class CanCoderSwerveModule extends SubsystemBase {
     private final SparkMax driveMotor;
     private final SparkMax steerMotor;
@@ -32,10 +35,13 @@ public class CanCoderSwerveModule extends SubsystemBase {
     private final SparkClosedLoopController driveController;
     private final SparkClosedLoopController steerController;
 
+    @NotLogged
     private final SparkMaxConfig driveConfig = new SparkMaxConfig();
+    @NotLogged
     private final SparkMaxConfig steerConfig = new SparkMaxConfig();
 
     private final CANcoder canCoder;
+    @NotLogged
     CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
     private final Rotation2d offset;
 
@@ -117,8 +123,8 @@ public class CanCoderSwerveModule extends SubsystemBase {
     public Rotation2d getCanCoderAngle() {        
         double unsignedAngle =
             canCoder.getAbsolutePosition().getValue()
-                .minus(offset.getMeasure())
-                .in(Radians) % (2 * Math.PI);
+            .minus(offset.getMeasure())
+            .in(Radians) % (2 * Math.PI);
 
         return new Rotation2d(unsignedAngle);
     }

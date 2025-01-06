@@ -9,6 +9,8 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,32 +20,33 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.*;
 
+@Logged
 public class SwerveDrive extends SubsystemBase {
     // Initialize new swerve module objects
-    private final CanCoderSwerveModule frontLeftMod = new CanCoderSwerveModule(
+    private final SwerveModule frontLeftMod = new SwerveModule(
             1,
             CANDevices.frontLeftDriveInverted,
             CANDevices.frontLeftSteerInverted,
             DriveConstants.frontLeftModuleOffset);
 
-    private final CanCoderSwerveModule frontRightMod = new CanCoderSwerveModule(
+    private final SwerveModule frontRightMod = new SwerveModule(
             2,
             CANDevices.frontRightDriveInverted,
             CANDevices.frontRightSteerInverted,
             DriveConstants.frontRightModuleOffset);
 
-    private final CanCoderSwerveModule backLeftMod = new CanCoderSwerveModule(
+    private final SwerveModule backLeftMod = new SwerveModule(
             3,
             CANDevices.backLeftDriveInverted,
             CANDevices.backLeftSteerInverted,
             DriveConstants.backLeftModuleOffset);
 
-    private final CanCoderSwerveModule backRightMod = new CanCoderSwerveModule(
+    private final SwerveModule backRightMod = new SwerveModule(
             4,
             CANDevices.backRightDriveInverted,
             CANDevices.backRightSteerInverted,  
@@ -59,6 +62,7 @@ public class SwerveDrive extends SubsystemBase {
     // Odometry for the robot, measured in meters for linear motion and radians for
     // rotational motion
     // Takes in kinematics and robot angle for parameters
+    @NotLogged
     private SwerveDrivePoseEstimator odometry = new SwerveDrivePoseEstimator(
             DriveConstants.kinematics,
             getHeading(),
@@ -422,9 +426,6 @@ public class SwerveDrive extends SubsystemBase {
             //   trackWidth
             // );
         }
-
-        // System.out.println(DriveConstants.PPRobotConfig.MOI);
-
         // Default PathPlanner config
         AutoBuilder.configure(
                 this::getPose, // Robot pose supplier
@@ -460,14 +461,14 @@ public class SwerveDrive extends SubsystemBase {
         // Updates the odometry every 20ms
         odometry.update(getHeading(), getModulePositions());
 
-        SmartDashboard.putNumber("front left CANcoder", frontLeftMod.getCanCoderAngle().getDegrees());
-        SmartDashboard.putNumber("front right CANcoder", frontRightMod.getCanCoderAngle().getDegrees());
-        SmartDashboard.putNumber("rear left CANcoder", backLeftMod.getCanCoderAngle().getDegrees());
-        SmartDashboard.putNumber("rear right CANcoder", backRightMod.getCanCoderAngle().getDegrees());
+        // SmartDashboard.putNumber("front left CANcoder", frontLeftMod.getCanCoderAngle().getDegrees());
+        // SmartDashboard.putNumber("front right CANcoder", frontRightMod.getCanCoderAngle().getDegrees());
+        // SmartDashboard.putNumber("rear left CANcoder", backLeftMod.getCanCoderAngle().getDegrees());
+        // SmartDashboard.putNumber("rear right CANcoder", backRightMod.getCanCoderAngle().getDegrees());
 
-        SmartDashboard.putNumber("rotation", getHeading().getDegrees());
-        SmartDashboard.putNumber("yaw", getPitchDegrees());
-        SmartDashboard.putNumber("roll", getRollDegrees());
+        // SmartDashboard.putNumber("rotation", getHeading().getDegrees());
+        // SmartDashboard.putNumber("yaw", getPitchDegrees());
+        // SmartDashboard.putNumber("roll", getRollDegrees());
     }
     
 
