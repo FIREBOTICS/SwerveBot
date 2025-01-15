@@ -29,28 +29,28 @@ import frc.robot.Constants.*;
 public class SwerveDrive extends SubsystemBase {
     // Initialize new swerve module objects
     private final SwerveModule frontLeftMod = new SwerveModule(
-            1,
-            CANDevices.frontLeftDriveInverted,
-            CANDevices.frontLeftSteerInverted,
-            DriveConstants.frontLeftModuleOffset);
+        1,
+        CANDevices.frontLeftDriveInverted,
+        CANDevices.frontLeftSteerInverted,
+        DriveConstants.frontLeftModuleOffset);
 
     private final SwerveModule frontRightMod = new SwerveModule(
-            2,
-            CANDevices.frontRightDriveInverted,
-            CANDevices.frontRightSteerInverted,
-            DriveConstants.frontRightModuleOffset);
+        2,
+        CANDevices.frontRightDriveInverted,
+        CANDevices.frontRightSteerInverted,
+        DriveConstants.frontRightModuleOffset);
 
     private final SwerveModule backLeftMod = new SwerveModule(
-            3,
-            CANDevices.backLeftDriveInverted,
-            CANDevices.backLeftSteerInverted,
-            DriveConstants.backLeftModuleOffset);
+        3,
+        CANDevices.backLeftDriveInverted,
+        CANDevices.backLeftSteerInverted,
+        DriveConstants.backLeftModuleOffset);
 
     private final SwerveModule backRightMod = new SwerveModule(
-            4,
-            CANDevices.backRightDriveInverted,
-            CANDevices.backRightSteerInverted,  
-            DriveConstants.backRightModuleOffset);
+        4,
+        CANDevices.backRightDriveInverted,
+        CANDevices.backRightSteerInverted,  
+        DriveConstants.backRightModuleOffset);
 
     private final AHRS navX = new AHRS(AHRS.NavXComType.kUSB1);
 

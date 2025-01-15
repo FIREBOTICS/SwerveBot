@@ -32,7 +32,9 @@ public class CanCoderSwerveModule extends SubsystemBase {
     private final RelativeEncoder driveEncoder;
     private final RelativeEncoder steerEncoder;
 
+    @NotLogged
     private final SparkClosedLoopController driveController;
+    @NotLogged
     private final SparkClosedLoopController steerController;
 
     @NotLogged

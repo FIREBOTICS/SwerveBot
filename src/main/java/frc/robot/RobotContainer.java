@@ -52,8 +52,6 @@ public class RobotContainer {
     configureBindings();
     SmartDashboard.putData("auto selector", autoSelector);
 
-    SmartDashboard.putData(swerveDrive);
-
     SmartDashboard.putData(field);
     // Logging callback for current robot pose
     PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
