@@ -32,6 +32,7 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
     DataLogManager.start(); // Save NetworkTables information to a file on the Rio
+    DataLogManager.log("Git SHA: " + BuildConstants.GIT_SHA); // Log what commit we're working under to "messages" and STDOUT
     Epilogue.bind(this); // Enables @Logged annotation-based logging (by generating code for every @Logged-annotated object)
   }
 

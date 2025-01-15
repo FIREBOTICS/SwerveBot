@@ -7,6 +7,6 @@ Swerve chassis code, for use in demos and as a base for season code
 - [x] Add ReduxSwerveModule
 - [x] Add event-deploy (https://docs.advantagekit.org/getting-started/installation/version-control/#event-deploy)
 - [x] Add logging of subsystems
-- [ ] Add logging of commits
+- [x] Add logging of commits
 - [-] Use Sendables for subsystem telemetry -- abandoned because @Logged is easier
-- [ ] Review speedFactor/Preferences usage, isFieldRelative implementation
+- [ ] Review speedFactor/Preferences usage, isFieldRelative implementation (but also Swerve *works* so low priority)
