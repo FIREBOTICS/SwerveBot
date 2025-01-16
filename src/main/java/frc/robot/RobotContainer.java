@@ -83,8 +83,11 @@ public class RobotContainer {
     // Schedule `lock` when the Xbox controller's left trigger is beyond the threshold,
     // cancelling on release.
     driverController.leftTrigger(ControllerConstants.triggerPressedThreshhold).whileTrue(swerveDrive.lockCommand());
-    driverController.x().onTrue(swerveDrive.speedUpCommand(0.1));
+    driverController.y().onTrue(swerveDrive.speedUpCommand(0.1));
     driverController.a().onTrue(swerveDrive.slowDownCommand(0.1));
+    driverController.back().onTrue(toggleFieldOrientedCommand());
+    driverController.start().onTrue(swerveDrive.resetHeadingCommand());
+
     swerveDrive.setDefaultCommand(
         swerveDrive.driveCommand(
           () -> -deadband(driverController.getLeftY()),
