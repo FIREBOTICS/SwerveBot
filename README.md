@@ -1,5 +1,5 @@
 # SwerveBot
-Swerve chassis code, for use in demos and as a base for season code
+Swerve chassis code, for use in demos and as a base for season code. Originally copied from [Logan Kippnick](https://github.com/logankippnick/2023-mk4i-neo-swerve-template) in 2023, modified to needs or wants of Team 6000.
 
 [Driver XBox Controller Scheme](https://www.padcrafter.com/?templates=Driver%7COperator&plat=0%7C0&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Speed+Up%7C&aButton=Slow+Down%7C&dpadUp=%7C&leftTrigger=Lock%7C&leftStick=X%2FY+Movement%7C&rightStickClick=Rotation%7C&startButton=Toggle+Field+Oriented%7C&backButton=Reset+Heading%7C#)
 
