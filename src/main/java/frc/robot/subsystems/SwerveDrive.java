@@ -28,25 +28,25 @@ import frc.robot.Constants.*;
 @Logged
 public class SwerveDrive extends SubsystemBase {
     // Initialize new swerve module objects
-    private final SwerveModule frontLeftMod = new SwerveModule(
+    private final DataPortSwerveModule frontLeftMod = new DataPortSwerveModule(
         1,
         CANDevices.frontLeftDriveInverted,
         CANDevices.frontLeftSteerInverted,
         DriveConstants.frontLeftModuleOffset);
 
-    private final SwerveModule frontRightMod = new SwerveModule(
+    private final DataPortSwerveModule frontRightMod = new DataPortSwerveModule(
         2,
         CANDevices.frontRightDriveInverted,
         CANDevices.frontRightSteerInverted,
         DriveConstants.frontRightModuleOffset);
 
-    private final SwerveModule backLeftMod = new SwerveModule(
+    private final DataPortSwerveModule backLeftMod = new DataPortSwerveModule(
         3,
         CANDevices.backLeftDriveInverted,
         CANDevices.backLeftSteerInverted,
         DriveConstants.backLeftModuleOffset);
 
-    private final SwerveModule backRightMod = new SwerveModule(
+    private final DataPortSwerveModule backRightMod = new DataPortSwerveModule(
         4,
         CANDevices.backRightDriveInverted,
         CANDevices.backRightSteerInverted,  
@@ -55,9 +55,9 @@ public class SwerveDrive extends SubsystemBase {
     private final AHRS navX = new AHRS(AHRS.NavXComType.kUSB1);
 
     private boolean isLocked = false;
-    private boolean isFieldOriented = false;
-    private double speedFactor = 0.3; //Speed
+    private boolean isFieldOriented = true;
     private String speedFactorKey = "Speed";
+    private double speedFactor = Preferences.getDouble(speedFactorKey, 0.3);
     private boolean isTracking = false;
     // Odometry for the robot, measured in meters for linear motion and radians for
     // rotational motion
@@ -76,11 +76,20 @@ public class SwerveDrive extends SubsystemBase {
     public boolean isFieldOriented() {
         return isFieldOriented;
     }
+    private void setFieldOriented(boolean isFieldOriented) {
+        this.isFieldOriented = isFieldOriented;
+    }
+    public Command setFieldOrientedCommand(boolean isFieldOriented) {
+        return runOnce(() -> setFieldOriented(isFieldOriented));
+    }
+    public Command toggleFieldOrientedCommand() {
+        return runOnce(() -> setFieldOriented(!isFieldOriented));
+    }
 
     public double getSpeedFactor() {
         return speedFactor;
     }
-    public void setSpeedFactor(double newSpeedFactor) {
+    private void setSpeedFactor(double newSpeedFactor) {
         this.speedFactor = newSpeedFactor;
         Preferences.setDouble(speedFactorKey, speedFactor);
         System.out.println(speedFactor);
@@ -120,7 +129,7 @@ public class SwerveDrive extends SubsystemBase {
      * zero while maintaining module headings.
      */
     public void stop() {
-        drive(0.0, 0.0, 0.0, isFieldOriented);
+        drive(0.0, 0.0, 0.0);
     }
 
     public void lock() {
@@ -303,8 +312,7 @@ public class SwerveDrive extends SubsystemBase {
     public Command driveCommand(
         DoubleSupplier driveSupplier, 
         DoubleSupplier strafeSupplier, 
-        DoubleSupplier rotSupplier,
-        BooleanSupplier isFieldRelativeSupplier) {
+        DoubleSupplier rotSupplier) {
             return runOnce(
                 () -> {
                     double drive = driveSupplier.getAsDouble();
@@ -316,13 +324,10 @@ public class SwerveDrive extends SubsystemBase {
                     double rot = rotSupplier.getAsDouble();
                     rot *= Math.abs(rot);
 
-                    boolean isFieldRelative = isFieldRelativeSupplier.getAsBoolean();
-
                     this.drive(
                         -drive,
                         -strafe,
-                        -rot,
-                        isFieldRelative
+                        -rot
                     );
                 }
         );
@@ -334,11 +339,9 @@ public class SwerveDrive extends SubsystemBase {
      * @param driveX The desired forward/backward lateral motion, in meters per second.
      * @param driveY The desired left/right lateral motion, in meters per second.
      * @param rotation The desired rotational motion, in radians per second.
-     * @param isFieldOriented whether driving is field- or robot-oriented.
      */
-    public void drive(double driveX, double driveY, double rotation, boolean isFieldRelative) {  
+    public void drive(double driveX, double driveY, double rotation) {  
         if(driveX != 0.0 || driveY != 0.0 || rotation != 0.0) isLocked = false;
-        this.isFieldOriented = isFieldRelative;
         
         if(isLocked) {
             setModuleStates(new SwerveModuleState[] {
@@ -356,7 +359,7 @@ public class SwerveDrive extends SubsystemBase {
 
             // Represents the overall state of the drive base.
             ChassisSpeeds speeds =
-                isFieldRelative
+                isFieldOriented
                     ? ChassisSpeeds.fromFieldRelativeSpeeds(
                         driveX, driveY, rotation, getHeading())
                     : new ChassisSpeeds(driveX, driveY, rotation);
@@ -460,16 +463,5 @@ public class SwerveDrive extends SubsystemBase {
     public void periodic() {
         // Updates the odometry every 20ms
         odometry.update(getHeading(), getModulePositions());
-
-        // SmartDashboard.putNumber("front left CANcoder", frontLeftMod.getCanCoderAngle().getDegrees());
-        // SmartDashboard.putNumber("front right CANcoder", frontRightMod.getCanCoderAngle().getDegrees());
-        // SmartDashboard.putNumber("rear left CANcoder", backLeftMod.getCanCoderAngle().getDegrees());
-        // SmartDashboard.putNumber("rear right CANcoder", backRightMod.getCanCoderAngle().getDegrees());
-
-        // SmartDashboard.putNumber("rotation", getHeading().getDegrees());
-        // SmartDashboard.putNumber("yaw", getPitchDegrees());
-        // SmartDashboard.putNumber("roll", getRollDegrees());
     }
-    
-
 }

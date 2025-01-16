@@ -28,8 +28,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 @Logged
 public class RobotContainer {
-  private boolean isFieldOriented = true;
-
   // Initialize subsystems.
   private final SwerveDrive swerveDrive = new SwerveDrive();
 
@@ -85,15 +83,14 @@ public class RobotContainer {
     driverController.leftTrigger(ControllerConstants.triggerPressedThreshhold).whileTrue(swerveDrive.lockCommand());
     driverController.y().onTrue(swerveDrive.speedUpCommand(0.1));
     driverController.a().onTrue(swerveDrive.slowDownCommand(0.1));
-    driverController.back().onTrue(toggleFieldOrientedCommand());
+    driverController.back().onTrue(swerveDrive.toggleFieldOrientedCommand());
     driverController.start().onTrue(swerveDrive.resetHeadingCommand());
 
     swerveDrive.setDefaultCommand(
         swerveDrive.driveCommand(
           () -> -deadband(driverController.getLeftY()),
           () -> -deadband(driverController.getLeftX()),
-          () -> -deadband(driverController.getRightX()),
-          () -> isFieldOriented
+          () -> -deadband(driverController.getRightX())
           )
     );
 
@@ -126,10 +123,4 @@ public class RobotContainer {
     // An example command will be run in autonomous
     return null;
   }
-
-  public Command toggleFieldOrientedCommand() {
-    return Commands.runOnce(
-      () -> isFieldOriented = !isFieldOriented);
-  }
-
 }

@@ -23,8 +23,6 @@ public class SwerveDriveCmd extends Command {
     private final DoubleSupplier strafe;
     private final DoubleSupplier rot;
     
-    private final boolean isFieldRelative;
-
     /**
      * Constructs a new SwerveDriveCmd.
      * 
@@ -33,14 +31,12 @@ public class SwerveDriveCmd extends Command {
      * @param drive The commanded forward/backward lateral motion.
      * @param strafe The commanded left/right lateral motion.
      * @param rot The commanded rotational motion.
-     * @param isFieldRelative Whether the commanded inputs are field- or robot-oriented.
      * @param swerveDrive The required SwerveDrive.
      */
     public SwerveDriveCmd(
         DoubleSupplier drive, 
         DoubleSupplier strafe, 
         DoubleSupplier rot,
-        boolean isFieldRelative,
         SwerveDrive swerveDrive
     ) {
 
@@ -49,8 +45,6 @@ public class SwerveDriveCmd extends Command {
         this.drive = drive;
         this.strafe = strafe;
         this.rot = rot;
-
-        this.isFieldRelative = isFieldRelative;
 
         addRequirements(swerveDrive);
 
@@ -77,8 +71,7 @@ public class SwerveDriveCmd extends Command {
         swerveDrive.drive(
             -drive,
             -strafe,
-            -rot,
-            isFieldRelative
+            -rot
         );
 
     }

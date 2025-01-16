@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
 @Logged
-public class SwerveModule extends SubsystemBase {
+public class DataPortSwerveModule extends SubsystemBase {
     private final SparkMax driveMotor;
     private final SparkMax steerMotor;
 
@@ -44,7 +44,7 @@ public class SwerveModule extends SubsystemBase {
     private final Rotation2d offset;
 
     /**
-     * Create a new SwerveModule.
+     * Create a new SwerveModule, using an Absolute Encoder plugged into the Data Port of the STEER SparkMax.
      * 
      * <p> Tracks and controls a single swerve module
      * 
@@ -56,7 +56,7 @@ public class SwerveModule extends SubsystemBase {
      * @param steerMotorInverted Steer NEO is inverted.
      * @param steerOffsetRadians Offset of Canandmag reading from forward.
      */
-    public SwerveModule(int moduleID, boolean driveMotorInverted, boolean steerMotorInverted, double steerOffsetRadians) {
+    public DataPortSwerveModule(int moduleID, boolean driveMotorInverted, boolean steerMotorInverted, double steerOffsetRadians) {
         moduleID *= 10;
         int driveMotorID = moduleID+1;
         int steerMotorID = moduleID+2;
